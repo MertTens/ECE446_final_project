@@ -9,7 +9,7 @@ CHUNK = 4096
 volume = 1
 f = 440.0
 duration = 3
-
+frequencies = [440, 525.3]
 
 def sine_wave(frequency = 440.0, rate = RATE, vol = volume):
     return((np.sin(2 * np.pi * np.arange(rate / frequency) * frequency / rate)).astype(np.float32))
@@ -17,13 +17,26 @@ def sine_wave(frequency = 440.0, rate = RATE, vol = volume):
 
 def normalize(array):
     factor = max(np.abs(np.amin(array)), np.amax(array))
+    if factor != 0:
+        ret = array/factor
+    else:
+        ret = array
     return(array/factor)
 
-thing = sine_wave()
+#sines = [sine_wave(440.0), sine_wave(523.25), sine_wave(659.25), sine_wave(783.99)]
+#indices = [0, 0, 0, 0]
+#lengths = [len(sines[0]), len(sines[1]), len(sines[2]), len(sines[3])]
 
+sines = []
+indices = []
+lengths = []
+volumes = []
 
-samples = sine_wave().tobytes()
-
+for i in range(len(frequencies)):
+    sines.append(sine_wave(frequencies[i]))
+    indices.append(0)
+    volumes.append(1)
+    lengths.append(len(sines[i]))
 
 p = pyaudio.PyAudio()
 
@@ -35,20 +48,6 @@ stream = p.open(format=pyaudio.paInt16, channels=1, rate=RATE, input=True, frame
 # The ideal way to fix this would be to somehow have oscillators that can play even though the code is running
 # It looks like pyaudio is able to do non-blocking reads and writes, look into this
 
-
-
-a_index = 0
-a_sine = sine_wave()
-a_length = len(a_sine)
-
-c_index = 0
-c_sine = sine_wave(523.25)
-c_length = len(c_sine)
-
-sines = [sine_wave(440.0), sine_wave(523.25), sine_wave(659.25), sine_wave(783.99)]
-indices = [0, 0, 0, 0]
-lengths = [len(sines[0]), len(sines[1]), len(sines[2]), len(sines[3])]
-
 while True:
     data = []
     for i in range(CHUNK):
@@ -57,9 +56,10 @@ while True:
 #        new_data_value = a_sine[a_index] + c_sine[c_index]
 
         new_data_value = 0
+        volumes[1] = (volumes[1] + 0.00001) % 1
         for j in range(len(sines)):
             indices[j] = (indices[j] + 1) % lengths[j]
-            new_data_value = new_data_value + sines[j][indices[j]]
+            new_data_value = new_data_value + volumes[j] * sines[j][indices[j]]
         data.append(new_data_value)
     
     new_data = np.asarray(normalize(data), dtype=np.float32)
