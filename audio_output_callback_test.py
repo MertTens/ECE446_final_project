@@ -5,12 +5,28 @@ import time
 import math
 
 RATE = 44100
-CHUNK = 32678
-chans = 2
+CHUNK = 16384
+chans = 1
 volume = 1
 f = 440.0
 duration = 3
 frequencies = [440, 525.3]
+
+def sine(current_time, frequency=440):
+    length = CHUNK
+    factor = float(frequency) * (math.pi * 2) / RATE
+    this_chunk = numpy.arange(length) + current_time
+    return numpy.sin(this_chunk * factor)
+
+def get_chunk():
+    data = sine(time.time())
+    return data * 0.1
+
+def callback(in_data, frame_count, time_info, status):
+    chunk = get_chunk() * 0.25
+    data = chunk.astype(numpy.float32).tostring()
+    return (data, pyaudio.paContinue)
+
 
 def sine_wave(frequency = 440.0, rate = RATE, vol = volume):
     return((np.sin(2 * np.pi * np.arange(rate / frequency) * frequency / rate)).astype(np.float32))
@@ -29,7 +45,10 @@ def convert_to_2_channels(left, right):
     for i in range(len(left)):
         stereo.append(left[i])
         stereo.append(right[i])    
-    return(stereo)
+
+#def callback(in_data, frame_count, time_info, flag):
+#    print(frame_count)
+#    return(in_data, pyaudio.paContinue)
 
 #sines = [sine_wave(440.0), sine_wave(523.25), sine_wave(659.25), sine_wave(783.99)]
 #indices = [0, 0, 0, 0]
@@ -50,7 +69,8 @@ for i in range(len(frequencies)):
 
 p = pyaudio.PyAudio()
 
-player = p.open(format=pyaudio.paFloat32, channels=chans, rate=RATE, output=True)
+player = p.open(format=pyaudio.paFloat32, channels=chans, rate=RATE, output=True, frames_per_buffer=CHUNK, stream_callback=callback)
+player.start_stream()
 #stream = p.open(format=pyaudio.paInt16, channels=1, rate=RATE, input=True, frames_per_buffer=CHUNK)
 
 # Note: since the write command hangs on write until the audio from it is played, it is probably best to 
@@ -59,30 +79,31 @@ player = p.open(format=pyaudio.paFloat32, channels=chans, rate=RATE, output=True
 # It looks like pyaudio is able to do non-blocking reads and writes, look into this
 
 while True:
-    data_left = []
-    data_right = []
-    for i in range(CHUNK):
+    time.sleep(1)
+#    data_left = []
+#    data_right = []
+#    for i in range(CHUNK):
 #        a_index = (a_index + 1) % a_length
 #        c_index = (c_index + 1) % c_length
 #        new_data_value = a_sine[a_index] + c_sine[c_index]
 
-        new_data_value_left = 0
-        new_data_value_right = 0
+#        new_data_value_left = 0
+#        new_data_value_right = 0
 #        volumes[1] = (volumes[1] + 0.00001) % 1
-        for j in range(len(sines)):
-            indices[j] = (indices[j] + 1) % lengths[j]
-            new_data_value_left = new_data_value_left + volumes_left[j] * sines[j][indices[j]]
-            new_data_value_right = new_data_value_right + volumes_right[j] * sines[j][indices[j]]
-        data_left.append(new_data_value_left)
-        data_right.append(new_data_value_right)
+#        for j in range(len(sines)):
+#            indices[j] = (indices[j] + 1) % lengths[j]
+#            new_data_value_left = new_data_value_left + volumes_left[j] * sines[j][indices[j]]
+#            new_data_value_right = new_data_value_right + volumes_right[j] * sines[j][indices[j]]
+#        data_left.append(new_data_value_left)
+#        data_right.append(new_data_value_right)
     
-    new_data_left = normalize(data_left)
-    new_data_right = np.asarray(normalize(data_right), dtype=np.float32)
-    new_data = np.asarray(convert_to_2_channels(new_data_left, new_data_right), dtype=np.float32)
-    player.write(new_data_right.tobytes())
+#    new_data_left = normalize(data_left)
+#    new_data_right = np.asarray(normalize(data_right), dtype=np.float32)
+#    new_data = np.asarray(convert_to_2_channels(new_data_left, new_data_right), dtype=np.float32)
+#    player.write(new_data_right.tobytes())
         
 
 
-stream.stop_stream()
-stream.close()
+player.stop_stream()
+player.close()
 p.terminate()
