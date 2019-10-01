@@ -15,7 +15,9 @@ while(True):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray2 = numpy.flip(gray,1)
 
-    print(gray2)
+    print(gray2.shape)
+    print(gray2[0][0])
+    print(gray2[360][0])
     # Display the resulting frame
     cv2.imshow('frame',gray2)
     if cv2.waitKey(1) & 0xFF == ord('q'):
