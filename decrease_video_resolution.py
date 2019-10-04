@@ -6,7 +6,8 @@ import cv2
 
 
 scale_percent = 1
-
+width = 20
+height = 3
 cap = cv2.VideoCapture(0)
 
 
@@ -19,8 +20,8 @@ while(True):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray2 = numpy.flip(gray,1)
     
-    width = int(gray2.shape[1] * scale_percent / 100)    
-    height = int(gray2.shape[0] * scale_percent / 100)    
+    #width = int(gray2.shape[1] * scale_percent / 100)    
+    #height = int(gray2.shape[0] * scale_percent / 100)    
     dim = (width, height)
 
     resized = cv2.resize(gray2, dim, interpolation = cv2.INTER_AREA)
