@@ -6,11 +6,11 @@ import math
 import cv2
 import numpy.core.multiarray
 
-freq_granularity = 8
+freq_granularity = 15
 freq_min = 300
 freq_max = 2000
 scale_percent = 1
-width = 4
+width = 2
 height = 1
 RATE = 44100
 CHUNK = 4096
@@ -27,6 +27,35 @@ increment = True
 
 freq_top = freq_max - freq_min
 cap = cv2.VideoCapture(0)
+
+
+
+   # voldex = int((resized[0][0] / 255) * freq_granularity)
+   # volumes_left[voldex] = 1
+   # voldex = int((resized[0][1] / 255) * freq_granularity)
+   # volumes_left[voldex] = 1
+   # voldex = int((resized[0][2] / 255) * freq_granularity)
+   # volumes_left[voldex] = 1
+   # voldex = int((resized[0][3] / 255) * freq_granularity)
+   # volumes_left[voldex] = 1
+#    voldex = int((resized[0][0] / 255) * freq_granularity)
+#    volumes_left[voldex] = 1
+
+def decision_man(width_idx, height_idx, resized):
+    voldex = int((resized[height_idx][width_idx] / 255) * freq_granularity)
+    # Later willl be otttther loggggic fooooor voooooolume deciiiiiiiiisions
+    right_volume = 0
+    if (1 - (width_idx / width)) > 0.5:
+        right_volume = 1
+
+    left_volume = 0
+    if (width / width) > 0.5:
+        left_volume = 1
+    volumes_left[voldex] = left_volume
+    volumes_right[voldex] = right_volume
+
+
+
 
 def sine(current_time, frequency=440):
     length = CHUNK
@@ -113,15 +142,17 @@ while True:
         break
 
 #    print(resized[0][0])
-
-    voldex = int((resized[0][0] / 255) * freq_granularity)
-    volumes_left[voldex] = 1
-    voldex = int((resized[0][1] / 255) * freq_granularity)
-    volumes_left[voldex] = 1
-    voldex = int((resized[0][2] / 255) * freq_granularity)
-    volumes_left[voldex] = 1
-    voldex = int((resized[0][3] / 255) * freq_granularity)
-    volumes_left[voldex] = 1
+    for i in range(height):
+        for j in range(width):
+            decision_man(j, i, resized)
+#    voldex = int((resized[0][0] / 255) * freq_granularity)
+#    volumes_left[voldex] = 1
+#    voldex = int((resized[0][1] / 255) * freq_granularity)
+#    volumes_left[voldex] = 1
+#    voldex = int((resized[0][2] / 255) * freq_granularity)
+#    volumes_left[voldex] = 1
+#    voldex = int((resized[0][3] / 255) * freq_granularity)
+#    volumes_left[voldex] = 1
 #    time.sleep(0.1)
     data_left = []
     data_right = []
