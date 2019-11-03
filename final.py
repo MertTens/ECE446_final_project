@@ -6,8 +6,8 @@ import math
 import cv2
 import numpy.core.multiarray
 
-freq_granularity = 15
-freq_min = 300
+freq_granularity = 2
+freq_min = 500
 freq_max = 2000
 scale_percent = 1
 width = 2
@@ -45,15 +45,14 @@ def decision_man(width_idx, height_idx, resized):
     voldex = int((resized[height_idx][width_idx] / 255) * freq_granularity)
     # Later willl be otttther loggggic fooooor voooooolume deciiiiiiiiisions
     right_volume = 0
-    if (1 - (width_idx / width)) > 0.5:
+    if ((width_idx) > ((width - 1)/2)):
         right_volume = 1
+        volumes_right[voldex] = right_volume
 
     left_volume = 0
-    if (width / width) > 0.5:
+    if ((width_idx) < ((width - 1)/2)):
         left_volume = 1
-    volumes_left[voldex] = left_volume
-    volumes_right[voldex] = right_volume
-
+        volumes_left[voldex] = left_volume
 
 
 
@@ -98,7 +97,7 @@ lengths = []
 volumes_left = []
 volumes_right = []
 
-for i in range(freq_granularity + 1):
+for i in range(freq_granularity):
     freq = int(freq_min + freq_top * (i / freq_granularity))
     frequencies.append(freq)
 
@@ -110,6 +109,7 @@ for i in range(len(frequencies)):
     volumes_left.append(0)
     volumes_right.append(0)
     lengths.append(len(sines[i]))
+
 
 p = pyaudio.PyAudio()
 
@@ -145,6 +145,9 @@ while True:
     for i in range(height):
         for j in range(width):
             decision_man(j, i, resized)
+
+    print()
+
 #    voldex = int((resized[0][0] / 255) * freq_granularity)
 #    volumes_left[voldex] = 1
 #    voldex = int((resized[0][1] / 255) * freq_granularity)
