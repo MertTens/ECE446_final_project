@@ -10,7 +10,7 @@ freq_granularity = 4
 freq_min = 500
 freq_max = 2000
 scale_percent = 1
-width = 2
+width = 50
 height = 1
 RATE = 44100
 CHUNK = 4096
@@ -43,16 +43,20 @@ cap = cv2.VideoCapture(0)
 
 def decision_man(width_idx, height_idx, resized):
     voldex = int(round((resized[height_idx][width_idx] / 255) * (freq_granularity-1)))
-    print(voldex)
+    #print(voldex)
     # Later willl be otttther loggggic fooooor voooooolume deciiiiiiiiisions
     right_volume = 0
     if ((width_idx) > ((width - 1)/2)):
         right_volume = 1
+        if(voldex > int((freq_granularity - 1)/2)):
+            right_volume = 0
         volumes_right[voldex] = right_volume
 
     left_volume = 0
     if ((width_idx) < ((width - 1)/2)):
         left_volume = 1
+        if(voldex > int((freq_granularity - 1)/2)):
+            left_volume = 0
         volumes_left[voldex] = left_volume
 
 
@@ -102,7 +106,7 @@ for i in range(freq_granularity):
     freq = int(freq_min + freq_top * (i / freq_granularity))
     frequencies.append(freq)
 
-print(frequencies)
+#print(frequencies)
 
 for i in range(len(frequencies)):
     sines.append(sine_wave(frequencies[i]))
@@ -147,7 +151,7 @@ while True:
         for j in range(width):
             decision_man(j, i, resized)
 
-    print()
+    #print()
 
 #    voldex = int((resized[0][0] / 255) * freq_granularity)
 #    volumes_left[voldex] = 1
