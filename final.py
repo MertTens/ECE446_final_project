@@ -40,6 +40,17 @@ cap = cv2.VideoCapture(0)
 #    voldex = int((resized[0][0] / 255) * freq_granularity)
 #    volumes_left[voldex] = 1
 
+
+
+## fun to dos
+"""
+
+1. Track object motion 
+2. Normalize pixel values to what's on the screen
+3. Try sinusoidal vs. sawtooth waves for up vs. down
+4. Create a testing environment and test navigation :) thank you alex for your ski goggel and dark jacket.
+
+"""
 def decision_man(width_idx, height_idx, resized, average):
     voldex = int(round((resized[height_idx][width_idx] / 255) * (freq_granularity-1)))
     avedex = (average / 255) * (freq_granularity-1)
@@ -47,14 +58,14 @@ def decision_man(width_idx, height_idx, resized, average):
     # Later willl be otttther loggggic fooooor voooooolume deciiiiiiiiisions
     right_volume = 0
     if ((width_idx) > ((width - 1)/2)):
-        right_volume = 1
+        right_volume = 2
         if(voldex > avedex):
             right_volume = 0
         volumes_right[voldex] = right_volume
 
     left_volume = 0
     if ((width_idx) < ((width - 1)/2)):
-        left_volume = 1
+        left_volume = 2
         if(voldex > avedex):
             left_volume = 0
         volumes_left[voldex] = left_volume
