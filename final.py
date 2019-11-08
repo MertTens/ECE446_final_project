@@ -6,7 +6,7 @@ import math
 import cv2
 import numpy.core.multiarray
 
-freq_granularity = 2
+freq_granularity = 4
 freq_min = 500
 freq_max = 2000
 scale_percent = 1
@@ -42,7 +42,8 @@ cap = cv2.VideoCapture(0)
 #    volumes_left[voldex] = 1
 
 def decision_man(width_idx, height_idx, resized):
-    voldex = int((resized[height_idx][width_idx] / 255) * freq_granularity)
+    voldex = int(round((resized[height_idx][width_idx] / 255) * (freq_granularity-1)))
+    print(voldex)
     # Later willl be otttther loggggic fooooor voooooolume deciiiiiiiiisions
     right_volume = 0
     if ((width_idx) > ((width - 1)/2)):
