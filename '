@@ -6,14 +6,15 @@ import math
 import cv2
 import numpy.core.multiarray
 
-freq_granularity = 10
-freq_min = 500
+freq_granularity = 15
+freq_min = 300
 freq_max = 2000
 scale_percent = 1
-width = 50
+width = 25
 height = 1
 RATE = 44100
 CHUNK = 4096
+#CHUNKS = 4096
 CHUNKS = 4096
 chans = 2
 volume = 1
@@ -40,25 +41,18 @@ cap = cv2.VideoCapture(0)
 #    voldex = int((resized[0][0] / 255) * freq_granularity)
 #    volumes_left[voldex] = 1
 
-def decision_man(width_idx, height_idx, resized, average):
-    voldex = int(round((resized[height_idx][width_idx] / 255) * (freq_granularity-1)))
-    avedex = (average / 255) * (freq_granularity-1)
-    #print(voldex)
+def decision_man(width_idx, height_idx, resized):
+    voldex = int((resized[height_idx][width_idx] / 255) * freq_granularity)
     # Later willl be otttther loggggic fooooor voooooolume deciiiiiiiiisions
     right_volume = 0
-    if ((width_idx) > ((width - 1)/2)):
+    if (1 - (width_idx / width)) > 0.5:
         right_volume = 1
-        if(voldex > avedex):
-            right_volume = 0
-        volumes_right[voldex] = right_volume
 
     left_volume = 0
-    if ((width_idx) < ((width - 1)/2)):
+    if (height_idx / height) > 0.5:
         left_volume = 1
-        if(voldex > avedex):
-            left_volume = 0
-        volumes_left[voldex] = left_volume
-
+    volumes_left[voldex] = left_volume
+    volumes_right[voldex] = right_volume
 
 
 def sine(current_time, frequency=440):
@@ -102,11 +96,11 @@ lengths = []
 volumes_left = []
 volumes_right = []
 
-for i in range(freq_granularity):
+for i in range(freq_granularity + 1):
     freq = int(freq_min + freq_top * (i / freq_granularity))
     frequencies.append(freq)
 
-#print(frequencies)
+print(frequencies)
 
 for i in range(len(frequencies)):
     sines.append(sine_wave(frequencies[i]))
@@ -114,7 +108,6 @@ for i in range(len(frequencies)):
     volumes_left.append(0)
     volumes_right.append(0)
     lengths.append(len(sines[i]))
-
 
 p = pyaudio.PyAudio()
 
@@ -147,21 +140,9 @@ while True:
         break
 
 #    print(resized[0][0])
-
-#COm pute averhage
-    average = 0
     for i in range(height):
         for j in range(width):
-            average = average + resized[i][j]
-
-    average = average / (width * height)
-
-    for i in range(height):
-        for j in range(width):
-            decision_man(j, i, resized, average)
-
-    #print()
-
+            decision_man(j, i, resized)
 #    voldex = int((resized[0][0] / 255) * freq_granularity)
 #    volumes_left[voldex] = 1
 #    voldex = int((resized[0][1] / 255) * freq_granularity)
