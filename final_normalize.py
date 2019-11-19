@@ -46,36 +46,30 @@ cap = cv2.VideoCapture(0)
 """
 
 1. Track object motion 
-
-thoight?
-- more to left = less in right ear
-- more to right = less in left ear
-
-- volume range 2, to determine volume for channel, get position of pixel and convert to percentage to left/right.
-    - send 2 * left percentage to left channel , 2 * right percentage to right channel
-    - increment volume instead of overwrit eit it e
-
-2. Normalize pixel values to what's on the screen ODNW
+2. Normalize pixel values to what's on the screen
 3. Try sinusoidal vs. sawtooth waves for up vs. down
 4. Create a testing environment and test navigation :) thank you alex for your ski goggel and dark jacket.
 
 """
-def decision_man(width_idx, height_idx, resized, average):
-    voldex = int(round((resized[height_idx][width_idx] / 255) * (freq_granularity-1)))
-    avedex = (average / 255) * (freq_granularity-1)
+def decision_man(width_idx, height_idx, resized, average, maximum, minimum):
+    way_up = resized[height_idx][width_idx] - minimum
+    range_of = maximum - minimum + 1
+    voldex = int(round((freq_granularity - 1) * way_up / range_of))
+    #print(voldex, way_up, range_of)
+    avedex = ((average - minimum) / (maximum - minimum + 1)) * (freq_granularity-1)
     #print(voldex)
     # Later willl be otttther loggggic fooooor voooooolume deciiiiiiiiisions
     right_volume = 0
     if ((width_idx) > ((width - 1)/2)):
         right_volume = 2
-        if(voldex > avedex):
+        if(voldex >= avedex):
             right_volume = 0
         volumes_right[voldex] = right_volume
 
     left_volume = 0
     if ((width_idx) < ((width - 1)/2)):
         left_volume = 2
-        if(voldex > avedex):
+        if(voldex >= avedex):
             left_volume = 0
         volumes_left[voldex] = left_volume
 
@@ -176,9 +170,13 @@ while True:
 
     average = average / (width * height)
 
+    resize_max = resized.max()
+
+    resize_min = resized.min()
+    
     for i in range(height):
         for j in range(width):
-            decision_man(j, i, resized, average)
+            decision_man(j, i, resized, average, resize_max, resize_min)
 
     #print()
 
